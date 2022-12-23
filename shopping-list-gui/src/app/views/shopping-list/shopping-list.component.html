@@ -1,0 +1,162 @@
+<div class="content mat-elevation-z8">
+    <div class="shopping-lists" *ngIf="isLoggedIn">
+    <h2>{{ 'shopping-list.browse' | translate}}</h2>
+    <button mat-raised-button color="white" [disabled]="isShoppingListEdited()" (click)="addEmptyShoppingList()">
+      <mat-icon>add</mat-icon> {{ 'shopping-list.add' | translate}}
+    </button>
+  </div>
+  <hr class="solid">
+  <ng-template *ngTemplateOutlet="shoppingListTemplate; context: {$implicit: shoppingLists}"></ng-template>
+</div>
+
+<ng-template #shoppingListTemplate let-shoppingLists>
+  <div class="shopping-list" *ngIf="!emptySearchList">
+    <div class="shopping-list-card-wrapper">
+      <div class="shopping-list-card" *ngFor="let shoppingList of shoppingLists">
+        <mat-card *ngIf="!shoppingList.isEdited" class="clickable mat-elevation-z4">
+          <mat-checkbox class="checkbox-list-completed" [checked]="!isStatusWaiting(shoppingList.status)"
+                        (change)="listCheckboxChange($event, shoppingList.id)"></mat-checkbox>
+          <mat-card-header>
+            <mat-card-title *ngIf="isStatusWaiting(shoppingList.status)">{{shoppingList.title}}</mat-card-title>
+            <mat-card-title *ngIf="!isStatusWaiting(shoppingList.status)" class="line-through">
+              {{shoppingList.title}}</mat-card-title>
+            <mat-card-subtitle>{{formatExecutionDate(shoppingList.executionDate)}}</mat-card-subtitle>
+          </mat-card-header>
+          <span class="spacer"></span>
+          <mat-card-actions>
+            <button mat-button (click)="editShoppingList(shoppingList.id)"
+                    [disabled]="!isStatusWaiting(shoppingList.status)">
+              <mat-icon>edit_outline</mat-icon>
+            </button>
+            <button mat-button (click)="deleteShoppingList(shoppingList.id)"
+                    [disabled]="!isStatusWaiting(shoppingList.status)">
+              <mat-icon>delete</mat-icon>
+            </button>
+            <button mat-raised-button *ngIf="!shoppingList.showItems"
+                    (click)="loadShoppingItemsList(shoppingList.id, false)">
+              <mat-icon>expand_more</mat-icon>
+            </button>
+            <button mat-raised-button *ngIf="shoppingList.showItems"
+                    (click)="loadShoppingItemsList(shoppingList.id, false)">
+              <mat-icon>expand_less</mat-icon>
+            </button>
+          </mat-card-actions>
+        </mat-card>
+        <mat-card *ngIf="shoppingList.isEdited" class="mat-elevation-z4">
+          <mat-card-header class="card-edit-view">
+            <mat-form-field class="full-width-input left-mat-field" appearance="outline" style="margin-bottom: -1.25em">
+              <mat-label>{{ 'shopping-list.title-label' | translate}}</mat-label>
+              <input matInput [(ngModel)]="shoppingList.title" required>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'shopping-list.date-label' | translate}}</mat-label>
+              <input matInput [(ngModel)]="shoppingList.executionDate" [matDatepicker]="picker" required>
+              <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
+          </mat-card-header>
+          <span class="spacer"></span>
+          <mat-card-actions>
+            <button mat-button [disabled]="!isShoppingListValid(shoppingList.id)" (click)="updateShoppingList(shoppingList.id)">
+              <mat-icon>done</mat-icon>
+            </button>
+            <button mat-button (click)="cancelUpdateShoppingList(shoppingList.id)">
+              <mat-icon>clear</mat-icon>
+            </button>
+          </mat-card-actions>
+        </mat-card>
+        <div *ngIf="shoppingList.showItems">
+          <ng-template *ngTemplateOutlet="shoppingItemsTemplate; context: {$implicit: shoppingItems}"></ng-template>
+          <button mat-raised-button color="white" style="margin-left: 20px" [disabled]="isShoppingItemEdited()"
+                  (click)="addEmptyItemToShoppingList(shoppingList.id)">
+            <mat-icon>add</mat-icon> {{ 'shopping-item.add' | translate}}
+          </button>
+          <hr class="solid">
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="empty-list" *ngIf="emptySearchList">
+    <h3>{{ 'shopping-list.no-data' | translate}}</h3>
+  </div>
+</ng-template>
+
+<ng-template #shoppingItemsTemplate let-shoppingItems>
+  <div class="shopping-item" *ngIf="!emptyItemsList">
+    <div class="shopping-list-card-wrapper">
+      <div class="shopping-list-card" *ngFor="let shoppingItem of shoppingItems">
+        <mat-card *ngIf="!shoppingItem.isEdited" class="clickable mat-elevation-z4">
+          <mat-checkbox class="checkbox-list-completed" [checked]="!isStatusWaiting(shoppingItem.status)"
+                        (change)="itemCheckboxChange($event, shoppingItem.id)"></mat-checkbox>
+          <mat-card-header>
+            <mat-card-title *ngIf="isStatusWaiting(shoppingItem.status)">{{shoppingItem.name}}</mat-card-title>
+            <mat-card-title *ngIf="!isStatusWaiting(shoppingItem.status)" class="line-through">
+              {{shoppingItem.name}}</mat-card-title>
+            <mat-card-subtitle>{{shoppingItem.quantity}} {{getUnit(shoppingItem.unit)}}</mat-card-subtitle>
+          </mat-card-header>
+          <span class="spacer"></span>
+          <mat-card-actions>
+            <button mat-button (click)="editShoppingItem(shoppingItem.id)"
+                    [disabled]="!isStatusWaiting(shoppingItem.status)">
+              <mat-icon>edit_outline</mat-icon>
+            </button>
+            <button mat-button (click)="deleteShoppingItem(shoppingItem.id)"
+                    [disabled]="!isStatusWaiting(shoppingItem.status)">
+              <mat-icon>delete</mat-icon>
+            </button>
+            <button mat-button [disabled]="!shoppingItem.hasImage" (click)="showItemImage(shoppingItem.id)">
+              <mat-icon>image</mat-icon>
+            </button>
+          </mat-card-actions>
+        </mat-card>
+        <mat-card *ngIf="shoppingItem.isEdited" class="mat-elevation-z4">
+          <mat-card-header class="card-edited-item">
+            <div class="name-and-image">
+            <mat-form-field class="full-width-input left-mat-field" appearance="outline" style="margin-bottom: -1.25em">
+              <mat-label>{{ 'shopping-item.name-label' | translate}}</mat-label>
+              <input matInput [(ngModel)]="shoppingItem.name" required>
+            </mat-form-field>
+            <div>
+              <input type="file" class="file-input" accept="image/*" [(ngModel)]="image"
+                     (change)="onFileSelected($event)" #fileUpload>
+              <div class="file-upload">
+                <button type="button" mat-mini-fab color="primary" class="upload-btn"
+                        (click)="fileUpload.click()">
+                  <mat-icon>add_photo_alternate</mat-icon>
+                </button>
+              </div>
+              <p>{{fileName || ('shopping-item.no-file' | translate)}}</p>
+            </div>
+            </div>
+            <div>
+          <mat-form-field class="full-width-input left-mat-field" appearance="outline" style="margin-bottom: -1.25em; margin-left: 25px">
+            <mat-label>{{ 'shopping-item.quantity-label' | translate}}</mat-label>
+            <input matInput [(ngModel)]="shoppingItem.quantity">
+          </mat-form-field>
+          <mat-form-field appearance="outline" style="margin-bottom: -1.25em">
+            <mat-label>{{ 'shopping-item.unit-label' | translate}}</mat-label>
+            <mat-select [(ngModel)]="shoppingItem.unit">
+              <mat-option *ngFor="let unit of units" [value]="unit.unit">
+                {{unit.name}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+            </div>
+          </mat-card-header>
+          <span class="spacer"></span>
+          <mat-card-actions>
+            <button mat-button [disabled]="!isShoppingItemValid(shoppingItem.id)" (click)="updateShoppingItem(shoppingItem.id)">
+              <mat-icon>done</mat-icon>
+            </button>
+            <button mat-button (click)="cancelUpdateShoppingItem(shoppingItem.id)">
+              <mat-icon>clear</mat-icon>
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+  <div class="empty-list" *ngIf="emptyItemsList">
+    <h3>{{ 'shopping-item.no-data' | translate}}</h3>
+  </div>
+</ng-template>

@@ -1,0 +1,12 @@
+<div class="header-small-width">
+  <h2 mat-dialog-title>{{data.name}}</h2>
+</div>
+<div mat-dialog-content>
+<!--    <div >-->
+      <img class="product-image" [src]="'data:image/jpeg;base64,'+data.image"
+           alt="{{ 'shopping-item.image-alt' | translate}}">
+<!--    </div>-->
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-button (click)="onNoClick()">{{ 'shopping-item.image-close' | translate}}</button>
+</div>

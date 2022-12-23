@@ -1,0 +1,95 @@
+@import 'node_modules/@angular/material/theming'
+
+.content
+  padding: 50px
+  width: 100%
+
+.mat-card
+  background-color: #f8f8f8
+  height: 100%
+  display: flex
+  flex-direction: row
+
+.mat-card-actions
+  text-align: end
+
+.mat-card-subtitle, .mat-card-actions
+  margin-bottom: 5px
+
+.mat-icon-button
+  margin-bottom: 16px
+
+.clickable
+  cursor: pointer
+  &:hover
+    @include mat-elevation(10)
+
+.shopping-list
+  padding: 10px
+  height: 810px
+  overflow-y: scroll
+
+.content
+  max-width: 1000px
+  margin-left: auto
+  margin-right: auto
+  vertical-align: middle
+
+.empty-list
+  padding: 20px
+  text-align: center
+  color: rgba(0, 0, 0, 0.54)
+
+.mat-paginator
+  background-color: #f8f8f8
+
+.shopping-lists
+  display: flex
+  flex-direction: row
+  align-content: center
+  align-items: center
+  justify-content: space-between
+
+.shopping-list-card
+  padding: 5px
+
+.spacer
+  flex: 1 1 auto
+
+.checkbox-list-completed
+  padding-top: 10px
+  padding-right: 5px
+
+.line-through
+  text-decoration: line-through
+  color: gray
+
+//mat-form-field
+//  margin-top: 16px
+
+.left-mat-field
+  margin-right: 30px
+
+//.card-edit-view
+//  display: flex
+//  flex-direction: row
+//  justify-content: space-evenly
+
+.shopping-item
+  padding: 10px
+  overflow-y: scroll
+
+.file-input
+  display: none
+
+.card-edited-item
+  display: flex
+  flex-direction: column
+
+//.mat-card-content
+//  margin-left: 20px
+
+.name-and-image
+  display: flex
+  flex-direction: row
+  justify-content: space-around
