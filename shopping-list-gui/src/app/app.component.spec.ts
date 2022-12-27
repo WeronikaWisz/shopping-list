@@ -1,16 +1,23 @@
 import { TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { AppComponent } from './app.component';
+import {TranslateModule, TranslateService} from "@ngx-translate/core";
 
 describe('AppComponent', () => {
+
+  let testTranslateService = jasmine.createSpyObj(['addLangs', 'setDefaultLang', 'getBrowserLang', 'use'])
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        RouterTestingModule
+        RouterTestingModule, TranslateModule.forRoot(),
       ],
       declarations: [
         AppComponent
       ],
+      providers: [
+        { provide : TranslateService, useValue: testTranslateService }
+      ]
     }).compileComponents();
   });
 
@@ -20,16 +27,31 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have as title 'shopping-list-gui'`, () => {
+  it(`should have as title 'Shopping List'`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('shopping-list-gui');
+    expect(app.title).toEqual('Shopping List');
   });
 
-  it('should render title', () => {
+  it(`should add translate languages`, () => {
     const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.content span')?.textContent).toContain('shopping-list-gui app is running!');
+    const app = fixture.componentInstance;
+    app.ngOnInit()
+    expect(testTranslateService.addLangs).toHaveBeenCalledWith(['pl', 'en'])
   });
+
+  it(`should set default language`, () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+    app.ngOnInit()
+    expect(testTranslateService.setDefaultLang).toHaveBeenCalledWith('pl')
+  });
+
+  it(`should get browser lang`, () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+    app.ngOnInit()
+    expect(testTranslateService.getBrowserLang).toHaveBeenCalled()
+  });
+
 });

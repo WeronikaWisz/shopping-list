@@ -5,7 +5,6 @@ import {ShoppingList} from "../../models/ShoppingList";
 import {EStatus} from "../../enums/EStatus";
 import {MatCheckboxChange} from "@angular/material/checkbox";
 import {ShoppingListService} from "../../services/shopping-list.service";
-import Swal from "sweetalert2";
 import {TranslateService} from "@ngx-translate/core";
 import {ShoppingItem} from "../../models/ShoppingItem";
 import {EUnit} from "../../enums/EUnit";
