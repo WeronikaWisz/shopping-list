@@ -9,6 +9,7 @@ import {TokenStorageService} from "../../../services/token-storage.service";
 import {of, throwError} from "rxjs";
 import {AuthService} from "../../../services/manage-users/auth.service";
 import Swal from "sweetalert2";
+import {LoginRequest} from "../../../models/auth/LoginRequest";
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
@@ -73,5 +74,54 @@ describe('LoginComponent', () => {
     expect(component.form.controls['username'].errors!.incorrect).toBeTruthy()
     expect(component.form.controls['password'].errors!.incorrect).toBeTruthy()
   });
+
+});
+
+describe('LoginComponent integration test with AuthService', () => {
+  let component: LoginComponent;
+  let fixture: ComponentFixture<LoginComponent>;
+  let service: AuthService;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      declarations: [ LoginComponent ],
+      imports: [
+        ReactiveFormsModule,
+        HttpClientTestingModule,
+        RouterTestingModule,
+        TranslateModule.forRoot()
+      ]
+    })
+      .compileComponents();
+    service = TestBed.inject(AuthService)
+  });
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(LoginComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  describe('login user', () => {
+
+    it('updateShoppingListButton should call service register', () => {
+      component.form.controls['username'].setValue('username')
+      component.form.controls['password'].setValue('passwordpassword')
+
+      fixture.detectChanges()
+
+      let request : LoginRequest = {
+        "username": 'username',
+        "password": 'passwordpassword'
+      }
+
+      let spy = spyOn(service, 'login').withArgs(request).and.callThrough()
+      const btn = fixture.debugElement.nativeElement.querySelector('#submit-login-button')
+      btn.click()
+      fixture.detectChanges()
+      expect(spy).toHaveBeenCalledWith(request)
+    });
+  });
+
 
 });

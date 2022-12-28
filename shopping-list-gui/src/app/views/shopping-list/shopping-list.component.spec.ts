@@ -14,6 +14,7 @@ import {ShoppingItem} from "../../models/ShoppingItem";
 import {EUnit} from "../../enums/EUnit";
 import {ShoppingItemService} from "../../services/shopping-item.service";
 import {MatCheckboxChange, MatCheckboxModule} from "@angular/material/checkbox";
+import {UsersService} from "../../services/manage-users/users.service";
 
 describe('ShoppingListComponent initialization', () => {
   let component: ShoppingListComponent;
@@ -471,7 +472,6 @@ describe('ShoppingListComponent manipulate shopping item', () => {
       const btn = fixture.debugElement.nativeElement.querySelector('#loadShoppingItemsListButton')
       btn.click()
       fixture.detectChanges()
-      expect(testShoppingItemService.getShoppingItems).toHaveBeenCalled()
       expect(component.shoppingItems).toHaveSize(1)
       expect(component.shoppingLists[0].showItems).toBeTrue()
     });
@@ -644,7 +644,6 @@ describe('ShoppingListComponent manipulate shopping item', () => {
       btn.click()
       fixture.detectChanges()
       expect(spy).toHaveBeenCalled()
-      expect(testShoppingItemService.addShoppingItem).toHaveBeenCalled()
       expect(component.shoppingItems[0].isEdited).toBeFalse()
     });
   });
@@ -722,7 +721,6 @@ describe('ShoppingListComponent manipulate shopping item', () => {
       btn.click()
       fixture.detectChanges()
       expect(spy).toHaveBeenCalled()
-      expect(testShoppingItemService.updateShoppingItem).toHaveBeenCalled()
       expect(component.shoppingItems[0].isEdited).toBeFalse()
       expect(component.shoppingLists[0].status).toEqual(EStatus.ACCOMPLISHED)
     });
@@ -763,7 +761,6 @@ describe('ShoppingListComponent manipulate shopping item', () => {
       btn.click()
       fixture.detectChanges()
       expect(spy).toHaveBeenCalled()
-      expect(testShoppingItemService.updateShoppingItem).toHaveBeenCalled()
       expect(component.shoppingItems[0].isEdited).toBeFalse()
       expect(component.shoppingLists[0].status).toEqual(EStatus.WAITING)
     });
@@ -836,19 +833,326 @@ describe('ShoppingListComponent manipulate shopping item', () => {
     });
 
     it('should show item image when showItemImageButton click', () => {
+      let spy = spyOn(component, 'showItemImage').and.callThrough()
       const btn = fixture.debugElement.nativeElement.querySelector('#showItemImageButton')
       btn.click()
       fixture.detectChanges()
-      expect(testShoppingItemService.getItemImage).toHaveBeenCalled()
+      expect(spy).toHaveBeenCalled()
     });
   });
 
-  describe('file manipulation', () => {
-    it('should set file when on file selected', () => {
-      let event = {target:{files:[1]}}
-      component.onFileSelected(event)
+  // describe('file manipulation', () => {
+  //   it('should set file when on file selected', () => {
+  //     let event = {target:{files:[1]}}
+  //     component.onFileSelected(event)
+  //     fixture.detectChanges()
+  //     expect(testShoppingItemService.getItemImage).toHaveBeenCalled()
+  //   });
+  // });
+
+});
+
+describe('ShoppingListComponent integration test with ShoppingItemService', () => {
+  let component: ShoppingListComponent;
+  let fixture: ComponentFixture<ShoppingListComponent>;
+  let service: ShoppingItemService;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      declarations: [ ShoppingListComponent ],
+      imports: [
+        HttpClientTestingModule,
+        RouterTestingModule,
+        TranslateModule.forRoot(),
+        MatDialogModule
+      ],
+    })
+      .compileComponents();
+    service = TestBed.inject(ShoppingItemService);
+  });
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(ShoppingListComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  describe('load shopping items', () => {
+
+    beforeEach(function () {
+      component.shoppingLists = [
+        {
+          "id": 1,
+          "title": "Zakupy 1",
+          "executionDate": new Date(),
+          "status": EStatus.WAITING,
+          "isEdited": false,
+          "showItems": false
+        }
+      ]
       fixture.detectChanges()
-      expect(testShoppingItemService.getItemImage).toHaveBeenCalled()
+    });
+
+    it('loadShoppingItemsListButton should call service getShoppingItems', () => {
+      let spy = spyOn(service, 'getShoppingItems').withArgs(1).and.callThrough()
+      const btn = fixture.debugElement.nativeElement.querySelector('#loadShoppingItemsListButton')
+      btn.click()
+      fixture.detectChanges()
+      expect(spy).toHaveBeenCalledWith(1)
+    });
+
+  });
+
+  describe('delete shopping item', () => {
+    beforeEach(function () {
+      component.shoppingLists = [
+        {
+          "id": 1,
+          "title": "Zakupy 1",
+          "executionDate": new Date(),
+          "status": EStatus.ACCOMPLISHED,
+          "isEdited": false,
+          "showItems": true
+        }
+      ];
+      component.shoppingItems = [
+        {
+          "id": 1,
+          "name": "Produkt 1",
+          "quantity": 2,
+          "unit": EUnit.PIECES,
+          "status": EStatus.WAITING,
+          "isEdited": false,
+          "shoppingListId": 1,
+          "hasImage": false
+        }
+      ]
+      fixture.detectChanges()
+    });
+    it('deleteShoppingItemButton should call service deleteShoppingItem', () => {
+      let spy = spyOn(service, 'deleteShoppingItem').withArgs(1).and.callThrough()
+      const btn = fixture.debugElement.nativeElement.querySelector('#deleteShoppingItemButton')
+      btn.click()
+      fixture.detectChanges()
+      expect(spy).toHaveBeenCalledWith(1)
+    });
+  });
+
+  describe('update shopping item', () => {
+
+    beforeEach(function () {
+      component.shoppingLists = [
+        {
+          "id": 1,
+          "title": "Zakupy 1",
+          "executionDate": new Date(),
+          "status": EStatus.ACCOMPLISHED,
+          "isEdited": false,
+          "showItems": true
+        }
+      ];
+      component.shoppingItems = [
+        {
+          "id": 1,
+          "name": "Produkt 1",
+          "quantity": 2,
+          "unit": EUnit.PIECES,
+          "status": EStatus.WAITING,
+          "isEdited": true,
+          "shoppingListId": 1,
+          "hasImage": false
+        }
+      ]
+      fixture.detectChanges()
+    });
+    it('updateShoppingItemButton should call service updateShoppingItem if id > 0', () => {
+      let spy = spyOn(service, 'updateShoppingItem').withArgs(1, component.shoppingItems[0], component.file).and.callThrough()
+      const btn = fixture.debugElement.nativeElement.querySelector('#updateShoppingItemButton')
+      btn.click()
+      fixture.detectChanges()
+      expect(spy).toHaveBeenCalledWith(1, component.shoppingItems[0], component.file)
+    });
+  });
+
+  describe('add shopping item', () => {
+
+    beforeEach(function () {
+      component.shoppingLists = [
+        {
+          "id": 1,
+          "title": "Zakupy 1",
+          "executionDate": new Date(),
+          "status": EStatus.WAITING,
+          "isEdited": false,
+          "showItems": true
+        }
+      ];
+      component.shoppingItems = [
+        {
+          "id": 0,
+          "name": "Produkt 1",
+          "quantity": 2,
+          "unit": EUnit.GRAMS,
+          "status": EStatus.ACCOMPLISHED,
+          "isEdited": true,
+          "shoppingListId": 1,
+          "hasImage": false
+        }
+      ]
+      fixture.detectChanges()
+    });
+    it('updateShoppingItemButton should call service addShoppingItem if id = 0', () => {
+      let spy = spyOn(service, 'addShoppingItem').withArgs(component.shoppingItems[0], component.file).and.callThrough()
+      const btn = fixture.debugElement.nativeElement.querySelector('#updateShoppingItemButton')
+      btn.click()
+      fixture.detectChanges()
+      expect(spy).toHaveBeenCalledWith(component.shoppingItems[0], component.file)
+    });
+  });
+
+  describe('get item image', () => {
+
+    beforeEach(function () {
+      component.shoppingLists = [
+        {
+          "id": 1,
+          "title": "Zakupy 1",
+          "executionDate": new Date(),
+          "status": EStatus.ACCOMPLISHED,
+          "isEdited": false,
+          "showItems": true
+        }
+      ];
+      component.shoppingItems = [
+        {
+          "id": 1,
+          "name": "Produkt 1",
+          "quantity": 2,
+          "unit": EUnit.LITERS,
+          "status": EStatus.WAITING,
+          "isEdited": false,
+          "shoppingListId": 1,
+          "hasImage": true
+        }
+      ]
+      fixture.detectChanges()
+    });
+
+    it('showItemImageButton should call service getItemImage', () => {
+      let spy = spyOn(service, 'getItemImage').withArgs(1).and.callThrough()
+      const btn = fixture.debugElement.nativeElement.querySelector('#showItemImageButton')
+      btn.click()
+      fixture.detectChanges()
+      expect(spy).toHaveBeenCalledWith(1)
+    });
+  });
+
+});
+
+describe('ShoppingListComponent integration test with ShoppingListService', () => {
+  let component: ShoppingListComponent;
+  let fixture: ComponentFixture<ShoppingListComponent>;
+  let service: ShoppingListService;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      declarations: [ ShoppingListComponent ],
+      imports: [
+        HttpClientTestingModule,
+        RouterTestingModule,
+        TranslateModule.forRoot(),
+        MatDialogModule
+      ],
+    })
+      .compileComponents();
+    service = TestBed.inject(ShoppingListService);
+  });
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(ShoppingListComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  describe('load shopping lists', () => {
+
+    it('should call service getShoppingLists', () => {
+      let spy = spyOn(service, 'getShoppingLists').and.callThrough()
+      component.loadShoppingLists()
+      fixture.detectChanges()
+      expect(spy).toHaveBeenCalled()
+    });
+
+  });
+
+  describe('delete shopping list', () => {
+    beforeEach(function () {
+      component.shoppingLists = [
+        {
+          "id": 1,
+          "title": "Zakupy 1",
+          "executionDate": new Date(),
+          "status": EStatus.WAITING,
+          "isEdited": false,
+          "showItems": false
+        }
+      ];
+      fixture.detectChanges()
+    });
+    it('deleteShoppingListButton should call service deleteShoppingList', () => {
+      let spy = spyOn(service, 'deleteShoppingList').withArgs(1).and.callThrough()
+      const btn = fixture.debugElement.nativeElement.querySelector('#deleteShoppingListButton')
+      btn.click()
+      fixture.detectChanges()
+      expect(spy).toHaveBeenCalledWith(1)
+    });
+  });
+
+  describe('update shopping list', () => {
+
+    beforeEach(function () {
+      component.shoppingLists = [
+        {
+          "id": 1,
+          "title": "Zakupy 1",
+          "executionDate": new Date(),
+          "status": EStatus.ACCOMPLISHED,
+          "isEdited": true,
+          "showItems": false
+        }
+      ];
+      fixture.detectChanges()
+    });
+    it('updateShoppingListmButton should call service updateShoppingList if id > 0', () => {
+      let spy = spyOn(service, 'updateShoppingList').withArgs(1, component.shoppingLists[0]).and.callThrough()
+      const btn = fixture.debugElement.nativeElement.querySelector('#updateShoppingListButton')
+      btn.click()
+      fixture.detectChanges()
+      expect(spy).toHaveBeenCalledWith(1, component.shoppingLists[0])
+    });
+  });
+
+  describe('add shopping list', () => {
+
+    beforeEach(function () {
+      component.shoppingLists = [
+        {
+          "id": 0,
+          "title": "Zakupy 1",
+          "executionDate": new Date(),
+          "status": EStatus.WAITING,
+          "isEdited": true,
+          "showItems": false
+        }
+      ];
+      fixture.detectChanges()
+    });
+    it('updateShoppingListButton should call service addShoppingList if id = 0', () => {
+      let spy = spyOn(service, 'addShoppingList').withArgs(component.shoppingLists[0]).and.callThrough()
+      const btn = fixture.debugElement.nativeElement.querySelector('#updateShoppingListButton')
+      btn.click()
+      fixture.detectChanges()
+      expect(spy).toHaveBeenCalledWith(component.shoppingLists[0])
     });
   });
 

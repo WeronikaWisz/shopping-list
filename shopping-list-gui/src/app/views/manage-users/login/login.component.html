@@ -20,7 +20,7 @@
           {{ 'manage-users.login.password-error' | translate}}
         </mat-error>
       </mat-form-field>
-      <button mat-raised-button color="primary" [disabled]="form.invalid" (click)="onSubmit()">
+      <button id="submit-login-button" mat-raised-button color="primary" [disabled]="form.invalid" (click)="onSubmit()">
         <mat-icon>login</mat-icon>
         <span class="login-button">
           {{ 'manage-users.login.login-button' | translate}}

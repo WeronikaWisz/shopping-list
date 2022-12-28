@@ -14,11 +14,6 @@ import {MatMenuModule} from "@angular/material/menu";
 import {MatDialog, MatDialogModule} from "@angular/material/dialog";
 import {TokenStorageService} from "../services/token-storage.service";
 import {of} from "rxjs";
-import {Router} from "@angular/router";
-import {ChangePasswordDialogComponent} from "../views/manage-users/change-password-dialog/change-password-dialog.component";
-import {InjectionToken} from "@angular/core";
-
-// export const WINDOW = new InjectionToken('window');
 
 describe('MainNavComponent', () => {
   let component: MainNavComponent;
@@ -29,28 +24,11 @@ describe('MainNavComponent', () => {
     roles: ['USER']
   }
 
-  // const thenable = {
-  //   then(onFulfilled: any) {
-  //     onFulfilled("Resolving");
-  //     throw new TypeError("Throwing");
-  //   },
-  // };
-
   let testTokenStorageService = jasmine.createSpyObj(['getUser', 'getToken', 'signOut'])
   testTokenStorageService.getToken.and.returnValue(of('sometoken'))
   testTokenStorageService.getUser.and.returnValue(of(testUser))
 
   let testMatDialog = jasmine.createSpyObj(['open'])
-
-  // let windowMock = {
-  //   location: {
-  //     reload: jasmine.createSpy('reload')
-  //   }
-  // }
-
-  // let testRouter = jasmine.createSpyObj(['navigate'])
-  // testRouter.navigate.and.returnValue(of(Promise.resolve(thenable)))
-  // testRouter.navigate.and.callFake(() => Promise.resolve("Success"))
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -70,9 +48,7 @@ describe('MainNavComponent', () => {
       ],
       providers: [
         { provide: TokenStorageService, useValue: testTokenStorageService },
-        { provide: MatDialog, useValue: testMatDialog},
-        // { provide: WINDOW, useValue: windowMock}
-        // { provide: Router, useValue: testRouter}
+        { provide: MatDialog, useValue: testMatDialog}
       ]
     })
     .compileComponents();
@@ -101,20 +77,9 @@ describe('MainNavComponent', () => {
     expect(testTokenStorageService.signOut).toHaveBeenCalled();
   });
 
-  // it('logout should redirect to login component', () => {
-    // let spy = spyOn(component, 'reloadPage').and.callThrough();
-  //   component.logout()
-  //   expect(testRouter.navigate).toHaveBeenCalledWith(['/login']);
-  // });
-
   it('changePassword should open ChangePasswordDialogComponent', () => {
     component.changePassword()
     expect(testMatDialog.open).toHaveBeenCalled();
   });
-
-  // it('reloadPage should call window location reload', () => {
-  //   component.reloadPage()
-  //   expect(windowMock.location.reload).toHaveBeenCalled();
-  // });
 
 });

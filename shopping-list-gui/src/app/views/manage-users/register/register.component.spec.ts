@@ -9,6 +9,7 @@ import {of, throwError} from "rxjs";
 import {TokenStorageService} from "../../../services/token-storage.service";
 import {AuthService} from "../../../services/manage-users/auth.service";
 import Swal from "sweetalert2";
+import {SignupRequest} from "../../../models/auth/SignupRequest";
 
 describe('RegisterComponent', () => {
   let component: RegisterComponent;
@@ -53,11 +54,6 @@ describe('RegisterComponent', () => {
     expect(component.isLoggedIn).toBeFalse()
   });
 
-  // it('should set loggedIn if token already set', () => {
-  //   testTokenStorageService.getToken.and.returnValue(of('sometoken'))
-  //   expect(component.isLoggedIn).toBeTruthy()
-  // });
-
   it('onSubmit should call authService register', () => {
     testAuthService.register.and.returnValue(of("data"))
     component.onSubmit()
@@ -76,6 +72,61 @@ describe('RegisterComponent', () => {
     spyOn(Swal,"fire").and.stub();
     component.onSubmit()
     expect(component.form.controls['formArray'].get([1])?.get('username')?.errors?.incorrect).toBeTruthy()
+  });
+
+});
+
+describe('RegisterComponent integration test with AuthService', () => {
+  let component: RegisterComponent;
+  let fixture: ComponentFixture<RegisterComponent>;
+  let service: AuthService;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      declarations: [ RegisterComponent ],
+      imports: [
+        ReactiveFormsModule,
+        HttpClientTestingModule,
+        RouterTestingModule,
+        TranslateModule.forRoot()
+      ]
+    })
+      .compileComponents();
+    service = TestBed.inject(AuthService)
+  });
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(RegisterComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  describe('register user', () => {
+
+    it('updateShoppingListButton should call service register', () => {
+      component.form.controls['formArray'].get([0])?.get('email')?.setValue('email@host.com')
+      component.form.controls['formArray'].get([0])?.get('name')?.setValue('name')
+      component.form.controls['formArray'].get([0])?.get('surname')?.setValue('surname')
+      component.form.controls['formArray'].get([1])?.get('password')?.setValue('passwordpassword')
+      component.form.controls['formArray'].get([1])?.get('username')?.setValue('username')
+      component.form.controls['formArray'].get([1])?.get('confirmPassword')?.setValue('passwordpassword')
+
+      fixture.detectChanges()
+
+      let request : SignupRequest = {
+        "username": 'username',
+        "email": 'email@host.com',
+        "password": 'passwordpassword',
+        "name": 'name',
+        "surname": 'surname'
+      }
+
+      let spy = spyOn(service, 'register').withArgs(request).and.callThrough()
+      const btn = fixture.debugElement.nativeElement.querySelector('#submit-register-button')
+      btn.click()
+      fixture.detectChanges()
+      expect(spy).toHaveBeenCalledWith(request)
+    });
   });
 
 });

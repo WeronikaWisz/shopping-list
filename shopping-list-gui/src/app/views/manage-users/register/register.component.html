@@ -7,21 +7,21 @@
           <ng-template matStepLabel>{{ 'manage-users.register.user-data' | translate}}</ng-template>
           <mat-form-field class="full-width-input left-mat-field" appearance="outline">
             <mat-label>{{ 'manage-users.register.name' | translate}}</mat-label>
-            <input matInput formControlName="name" required>
+            <input matInput formControlName="name" required id="name">
             <mat-error>
               {{ 'manage-users.register.name-error' | translate}}
             </mat-error>
           </mat-form-field>
           <mat-form-field class="full-width-input" appearance="outline">
             <mat-label>{{ 'manage-users.register.surname' | translate}}</mat-label>
-            <input matInput formControlName="surname" required>
+            <input matInput formControlName="surname" required id="surname">
             <mat-error>
               {{ 'manage-users.register.surname-error' | translate}}
             </mat-error>
           </mat-form-field>
           <mat-form-field class="full-width-input left-mat-field" appearance="outline">
             <mat-label>{{ 'manage-users.register.email' | translate}}</mat-label>
-            <input matInput formControlName="email" required>
+            <input matInput formControlName="email" required id="email">
             <mat-error>
               {{ 'manage-users.register.email-error' | translate}}
             </mat-error>
@@ -34,7 +34,7 @@
           <ng-template matStepLabel>{{ 'manage-users.register.profile-data' | translate}}</ng-template>
           <mat-form-field class="full-width-input" appearance="outline">
             <mat-label>{{ 'manage-users.register.username' | translate}}</mat-label>
-            <input matInput formControlName="username" required>
+            <input matInput formControlName="username" required id="username">
             <mat-hint>{{ 'manage-users.register.username-hint' | translate}}</mat-hint>
             <mat-error>
               {{ 'manage-users.register.username-error' | translate}}
@@ -43,7 +43,7 @@
           <br/>
           <mat-form-field class="full-width-input left-mat-field" appearance="outline">
             <mat-label>{{ 'manage-users.register.password' | translate}}</mat-label>
-            <input matInput [type]="hide ? 'password' : 'text'" formControlName="password" required>
+            <input matInput [type]="hide ? 'password' : 'text'" formControlName="password" required id="password">
             <button mat-icon-button matSuffix (click)="hide = !hide"
                     [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
               <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
@@ -55,7 +55,7 @@
           </mat-form-field>
           <mat-form-field class="full-width-input" appearance="outline">
             <mat-label>{{ 'manage-users.register.confirm-password' | translate}}</mat-label>
-            <input matInput type="password" formControlName="confirmPassword" required>
+            <input matInput type="password" formControlName="confirmPassword" required id="confirm-password">
             <mat-error>
               {{ 'manage-users.register.confirm-password-error' | translate}}
             </mat-error>
@@ -66,7 +66,7 @@
         </mat-step>
       </mat-vertical-stepper>
       <span class="register-button">
-        <button mat-raised-button color="primary" [disabled]="form.invalid" (click)="onSubmit()">
+        <button id="submit-register-button" mat-raised-button color="primary" [disabled]="form.invalid" (click)="onSubmit()">
           <mat-icon>how_to_reg</mat-icon>
           <span class="signup-button">{{ 'manage-users.register.register-button' | translate}}</span>
         </button>
