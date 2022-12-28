@@ -62,14 +62,14 @@
                     (click)="updateShoppingList(shoppingList.id)" id="updateShoppingListButton">
               <mat-icon>done</mat-icon>
             </button>
-            <button mat-button (click)="cancelUpdateShoppingList(shoppingList.id)">
+            <button mat-button (click)="cancelUpdateShoppingList(shoppingList.id)" id="cancelUpdateShoppingListButton">
               <mat-icon>clear</mat-icon>
             </button>
           </mat-card-actions>
         </mat-card>
         <div *ngIf="shoppingList.showItems">
           <ng-template *ngTemplateOutlet="shoppingItemsTemplate; context: {$implicit: shoppingItems}"></ng-template>
-          <button mat-raised-button color="white" style="margin-left: 20px" [disabled]="isShoppingItemEdited()"
+          <button id="addEmptyShoppingItemButton" mat-raised-button color="white" style="margin-left: 20px" [disabled]="isShoppingItemEdited()"
                   (click)="addEmptyItemToShoppingList(shoppingList.id)">
             <mat-icon>add</mat-icon> {{ 'shopping-item.add' | translate}}
           </button>
@@ -98,15 +98,15 @@
           </mat-card-header>
           <span class="spacer"></span>
           <mat-card-actions>
-            <button mat-button (click)="editShoppingItem(shoppingItem.id)"
+            <button id="editShoppingItemButton" mat-button (click)="editShoppingItem(shoppingItem.id)"
                     [disabled]="!isStatusWaiting(shoppingItem.status)">
               <mat-icon>edit_outline</mat-icon>
             </button>
-            <button mat-button (click)="deleteShoppingItem(shoppingItem.id)"
+            <button id="deleteShoppingItemButton" mat-button (click)="deleteShoppingItem(shoppingItem.id)"
                     [disabled]="!isStatusWaiting(shoppingItem.status)">
               <mat-icon>delete</mat-icon>
             </button>
-            <button mat-button [disabled]="!shoppingItem.hasImage" (click)="showItemImage(shoppingItem.id)">
+            <button id="showItemImageButton" mat-button [disabled]="!shoppingItem.hasImage" (click)="showItemImage(shoppingItem.id)">
               <mat-icon>image</mat-icon>
             </button>
           </mat-card-actions>
@@ -147,10 +147,10 @@
           </mat-card-header>
           <span class="spacer"></span>
           <mat-card-actions>
-            <button mat-button [disabled]="!isShoppingItemValid(shoppingItem.id)" (click)="updateShoppingItem(shoppingItem.id)">
+            <button id="updateShoppingItemButton" mat-button [disabled]="!isShoppingItemValid(shoppingItem.id)" (click)="updateShoppingItem(shoppingItem.id)">
               <mat-icon>done</mat-icon>
             </button>
-            <button mat-button (click)="cancelUpdateShoppingItem(shoppingItem.id)">
+            <button id="cancelUpdateShoppingItemButton" mat-button (click)="cancelUpdateShoppingItem(shoppingItem.id)">
               <mat-icon>clear</mat-icon>
             </button>
           </mat-card-actions>
