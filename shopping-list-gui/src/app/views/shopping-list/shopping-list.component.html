@@ -18,8 +18,8 @@
           <mat-checkbox class="checkbox-list-completed" [checked]="!isStatusWaiting(shoppingList.status)"
                         (change)="listCheckboxChange($event, shoppingList.id)"></mat-checkbox>
           <mat-card-header>
-            <mat-card-title *ngIf="isStatusWaiting(shoppingList.status)">{{shoppingList.title}}</mat-card-title>
-            <mat-card-title *ngIf="!isStatusWaiting(shoppingList.status)" class="line-through">
+            <mat-card-title class="shopping-list-title" *ngIf="isStatusWaiting(shoppingList.status)">{{shoppingList.title}}</mat-card-title>
+            <mat-card-title class="shopping-list-title" *ngIf="!isStatusWaiting(shoppingList.status)" class="line-through">
               {{shoppingList.title}}</mat-card-title>
             <mat-card-subtitle>{{formatExecutionDate(shoppingList.executionDate)}}</mat-card-subtitle>
           </mat-card-header>
@@ -47,11 +47,12 @@
           <mat-card-header class="card-edit-view">
             <mat-form-field class="full-width-input left-mat-field" appearance="outline" style="margin-bottom: -1.25em">
               <mat-label>{{ 'shopping-list.title-label' | translate}}</mat-label>
-              <input matInput [(ngModel)]="shoppingList.title" required>
+              <input matInput [(ngModel)]="shoppingList.title" required id="inputTitle">
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>{{ 'shopping-list.date-label' | translate}}</mat-label>
-              <input matInput [(ngModel)]="shoppingList.executionDate" [matDatepicker]="picker" required>
+              <input matInput [(ngModel)]="shoppingList.executionDate" [matDatepicker]="picker" required
+                     id="inputExecutionDate">
               <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
               <mat-datepicker #picker></mat-datepicker>
             </mat-form-field>
@@ -86,13 +87,13 @@
 <ng-template #shoppingItemsTemplate let-shoppingItems>
   <div class="shopping-item" *ngIf="!emptyItemsList">
     <div class="shopping-list-card-wrapper">
-      <div class="shopping-list-card" *ngFor="let shoppingItem of shoppingItems">
+      <div class="shopping-item-card" *ngFor="let shoppingItem of shoppingItems">
         <mat-card *ngIf="!shoppingItem.isEdited" class="clickable mat-elevation-z4">
-          <mat-checkbox class="checkbox-list-completed" [checked]="!isStatusWaiting(shoppingItem.status)"
+          <mat-checkbox class="checkbox-item-completed" [checked]="!isStatusWaiting(shoppingItem.status)"
                         (change)="itemCheckboxChange($event, shoppingItem.id)"></mat-checkbox>
           <mat-card-header>
-            <mat-card-title *ngIf="isStatusWaiting(shoppingItem.status)">{{shoppingItem.name}}</mat-card-title>
-            <mat-card-title *ngIf="!isStatusWaiting(shoppingItem.status)" class="line-through">
+            <mat-card-title class="shopping-item-title" *ngIf="isStatusWaiting(shoppingItem.status)">{{shoppingItem.name}}</mat-card-title>
+            <mat-card-title class="shopping-item-title" *ngIf="!isStatusWaiting(shoppingItem.status)" class="line-through">
               {{shoppingItem.name}}</mat-card-title>
             <mat-card-subtitle>{{shoppingItem.quantity}} {{getUnit(shoppingItem.unit)}}</mat-card-subtitle>
           </mat-card-header>
@@ -116,7 +117,7 @@
             <div class="name-and-image">
             <mat-form-field class="full-width-input left-mat-field" appearance="outline" style="margin-bottom: -1.25em">
               <mat-label>{{ 'shopping-item.name-label' | translate}}</mat-label>
-              <input matInput [(ngModel)]="shoppingItem.name" required>
+              <input matInput [(ngModel)]="shoppingItem.name" required id="name-input">
             </mat-form-field>
             <div>
               <input type="file" class="file-input" accept="image/*" [(ngModel)]="image"
@@ -133,11 +134,11 @@
             <div>
           <mat-form-field class="full-width-input left-mat-field" appearance="outline" style="margin-bottom: -1.25em; margin-left: 25px">
             <mat-label>{{ 'shopping-item.quantity-label' | translate}}</mat-label>
-            <input matInput [(ngModel)]="shoppingItem.quantity">
+            <input matInput [(ngModel)]="shoppingItem.quantity" id="quantity-input">
           </mat-form-field>
           <mat-form-field appearance="outline" style="margin-bottom: -1.25em">
             <mat-label>{{ 'shopping-item.unit-label' | translate}}</mat-label>
-            <mat-select [(ngModel)]="shoppingItem.unit">
+            <mat-select [(ngModel)]="shoppingItem.unit" id="item-unit-select">
               <mat-option *ngFor="let unit of units" [value]="unit.unit">
                 {{unit.name}}
               </mat-option>
