@@ -9,7 +9,6 @@ import com.shoppinglist.shoppinglistapp.models.Role;
 import com.shoppinglist.shoppinglistapp.models.ShoppingList;
 import com.shoppinglist.shoppinglistapp.models.User;
 import com.shoppinglist.shoppinglistapp.repositories.RoleRepository;
-import com.shoppinglist.shoppinglistapp.repositories.ShoppingItemRepository;
 import com.shoppinglist.shoppinglistapp.repositories.ShoppingListRepository;
 import com.shoppinglist.shoppinglistapp.repositories.UserRepository;
 import com.shoppinglist.shoppinglistapp.security.WebSecurityConfig;
@@ -18,6 +17,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,13 +32,16 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import javax.annotation.PostConstruct;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.BDDMockito.given;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -46,13 +49,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
 @Import(WebSecurityConfig.class)
+@WithUserDetails("username")
 public class ShoppingListControllerIntegrationTest {
 
     @MockBean
     private ShoppingListRepository shoppingListRepository;
-
-    @MockBean
-    private ShoppingItemRepository shoppingItemRepository;
 
     @MockBean
     private UserRepository userRepository;
@@ -70,7 +71,7 @@ public class ShoppingListControllerIntegrationTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @MockBean
+    @Autowired
     private ModelMapper modelMapper;
 
     String username = "username";
@@ -88,26 +89,14 @@ public class ShoppingListControllerIntegrationTest {
         user.setPassword(password);
         Optional<Role> userRole = roleRepository.findByName(ERole.ROLE_USER);
         userRole.ifPresent(role -> user.getRoles().add(role));
+    }
+
+    @PostConstruct
+    public void saveUser(){
         when(userRepository.findByUsername(username)).thenReturn(java.util.Optional.of(user));
     }
 
-//    @BeforeEach
-//    void setUp() {
-//        this.mockMvc = MockMvcBuilders
-//                .webAppContextSetup(this.context)
-//                .apply(springSecurity())
-//                .build();
-////        messageSource = Mockito.mock(MessageSource.class);
-////        when(messageSource.getMessage(anyString(), any(Object[].class),any(Locale.class))).thenReturn("");
-////        delegatingMessageSource.setParentMessageSource(messageSource);
-//
-//        user.setUsername(username);
-//        user.setPassword(password);
-//        when(userRepository.findByUsername("username")).thenReturn(java.util.Optional.ofNullable(user));
-//    }
-
     @Test
-    @WithUserDetails("username")
     void testGetShoppingLists() throws Exception {
 
         ShoppingList shoppingList = new ShoppingList();
@@ -122,10 +111,9 @@ public class ShoppingListControllerIntegrationTest {
         List<ShoppingListDto> shoppingListsDto = new ArrayList<>();
         shoppingListsDto.add(shoppingListDto);
 
-        given(shoppingListRepository.findShoppingListByStatusInAndUser(
+        when(shoppingListRepository.findShoppingListByStatusInAndUser(
                 Arrays.asList(EStatus.WAITING, EStatus.ACCOMPLISHED), user))
-                .willReturn(java.util.Optional.of(shoppingListList));
-        given(modelMapper.map(shoppingList, ShoppingListDto.class)).willReturn(shoppingListDto);
+                .thenReturn(java.util.Optional.of(shoppingListList));
 
         MvcResult result =
                 mockMvc.perform(get("/shopping-list/shopping-list")
@@ -136,4 +124,72 @@ public class ShoppingListControllerIntegrationTest {
         assertEquals(objectMapper.writeValueAsString(shoppingListsDto), result.getResponse().getContentAsString());
     }
 
+    @Test
+    void testAddShoppingList() throws Exception {
+
+        ShoppingListDto shoppingListDto = new ShoppingListDto();
+        shoppingListDto.setTitle("title");
+        shoppingListDto.setStatus(EStatus.WAITING);
+
+        when(shoppingListRepository.save(Mockito.any(ShoppingList.class))).thenAnswer(i -> i.getArguments()[0]);
+
+        mockMvc.perform(post("/shopping-list/shopping-list")
+                        .with(csrf())
+                        .content(objectMapper.writeValueAsString(shoppingListDto))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        assertNotNull(shoppingListRepository.findShoppingListByStatusInAndUser(List.of(EStatus.WAITING), user));
+
+    }
+
+    @Test
+    void testUpdateShoppingList() throws Exception {
+
+        Long shoppingListId = 1L;
+
+        ShoppingList shoppingList = new ShoppingList();
+        shoppingList.setId(shoppingListId);
+        shoppingList.setUser(user);
+        shoppingList.setStatus(EStatus.WAITING);
+        shoppingList.setTitle("oldTitle");
+
+        ShoppingListDto shoppingListDto = new ShoppingListDto();
+        shoppingListDto.setTitle("newTitle");
+        shoppingListDto.setStatus(EStatus.ACCOMPLISHED);
+
+        when(shoppingListRepository.findById(shoppingListId)).thenReturn(Optional.of(shoppingList));
+
+        mockMvc.perform(put("/shopping-list/shopping-list/{shoppingListId}", shoppingListId)
+                        .with(csrf())
+                        .content(objectMapper.writeValueAsString(shoppingListDto))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        assertEquals(EStatus.ACCOMPLISHED, shoppingList.getStatus());
+        assertEquals("newTitle", shoppingList.getTitle());
+
+    }
+
+    @Test
+    void testDeleteShoppingList() throws Exception {
+        Long id = 1L;
+
+        ShoppingList shoppingList = new ShoppingList();
+        shoppingList.setId(id);
+        shoppingList.setUser(user);
+        shoppingList.setStatus(EStatus.WAITING);
+        shoppingList.setTitle("title");
+
+        when(shoppingListRepository.findById(id)).thenReturn(Optional.of(shoppingList));
+
+        mockMvc.perform(delete("/shopping-list/shopping-list/{shoppingListId}", id)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        assertEquals(EStatus.DELETED, shoppingList.getStatus());
+        assertNotNull(shoppingList.getDeleteDate());
+
+    }
 }
