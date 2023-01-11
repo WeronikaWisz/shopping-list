@@ -4,5 +4,8 @@
   "compilerOptions": {
     "sourceMap": false,
     "types": ["cypress"]
-  }
+  },
+  "exclude": [
+    "node_modules"
+  ]
 }

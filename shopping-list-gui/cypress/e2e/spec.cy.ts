@@ -202,3 +202,24 @@ describe('Test sign out', () => {
     cy.url().should('includes', 'login')
   })
 })
+describe('Test sign in user not exists', () => {
+  it('should redirect to login page', () => {
+    cy.visit('/')
+    cy.url().should('includes', 'login')
+  })
+  it('should have disabled login button', () => {
+    cy.get('#submit-login-button')
+      .should('be.disabled')
+  })
+  it('should not login', () => {
+    cy.fixture('login-data-error').then((data) => {
+      const {username, password} = data
+      cy.get('input[formcontrolname="username"]').type(username)
+      cy.get('input[formcontrolname="password"]').type(password)
+      cy.get('#submit-login-button')
+        .should('not.be.disabled')
+      cy.get('#submit-login-button').click()
+      cy.url().should('include', 'login')
+    })
+  })
+})

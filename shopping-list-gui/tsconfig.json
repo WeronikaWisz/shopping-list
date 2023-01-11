@@ -26,5 +26,11 @@
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictTemplates": true
-  }
+  },
+  "include": [
+    "node_modules/cypress"
+  ],
+  "exclude": [
+    "node_modules/cypress"
+  ]
 }
