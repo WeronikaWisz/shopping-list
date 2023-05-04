@@ -1,4 +1,4 @@
-# shopping-list
+# Shopping list
 Aplikacja webowa, która umożliwia tworzenie list zakupów. Realizowana w ramach kursu "Testowanie i i walidacja oprogramowania". Raport z testów znajduje się w pliku Raport.pdf.
 
 ### Przed uruchomieniem aplikacji należy zainstalować:
